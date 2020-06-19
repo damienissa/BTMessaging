@@ -155,7 +155,7 @@ extension Host: CBPeripheralManagerDelegate {
             })
         } else {
             if dataHelper == nil {
-                handler?(requests.first!.characteristic.value,
+                handler?(requests.first!.value,
                          charType.from(requests.first!.characteristic.uuid.uuidString))
             }
         }

@@ -59,7 +59,7 @@ How to create host:
     host.send(cData, for: Char.demo)
     
 ### Sending big data
-First of all you must convert your data to the string! You can use `Codable` or any other way to convert data!  Next step is use chunk helper `chunkedData(with: SIZE_OF_CHUNK)`
+**First of all you must convert your data to the string!** You can use `Codable` or any other way to convert data!  Next step is use chunk helper `chunkedData(with: SIZE_OF_CHUNK)`
 Example:
 
 	    let dat = Array(0..<100).compactMap(String.init).joined(separator: ", ").chunkedData(with: 128)

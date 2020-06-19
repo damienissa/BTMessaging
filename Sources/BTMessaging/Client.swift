@@ -81,15 +81,16 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
         if str.contains("Size: ") == true {
             dataHelper = BigDataHelper(with: { (result) in
                 self.handler?(result.data(using: .utf8)!, self.charType.from(characteristic.uuid.uuidString))
+                self.dataHelper = nil
             })
+        } else {
+            if dataHelper == nil {
+                handler?(characteristic.value,
+                         charType.from(characteristic.uuid.uuidString))
+            }
         }
         
         dataHelper?.receive(characteristic.value!)
-        
-        if dataHelper == nil {
-            handler?(characteristic.value,
-                     charType.from(characteristic.uuid.uuidString))
-        }
     }
     
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
@@ -124,14 +125,17 @@ extension Client: BTMessaging {
             }
         }
         
-        serial.start()
+        serial.startIfNeeded()
     }
     
     public func send(_ data: Data, for characteristic: Characteristic) {
         
         // MARK: - Data limit - 512 bytes -
         if let char = characteristics.first(where: { $0.uuid == characteristic.char.uuid }) {
-            connectedPeripheral?.writeValue(data, for: char, type: .withResponse)
+            serial.addOperation { [weak self] in
+                self?.connectedPeripheral?.writeValue(data, for: char, type: .withResponse)
+            }
+            serial.startIfNeeded()
         }
     }
     

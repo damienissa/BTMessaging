@@ -18,7 +18,14 @@ public final class SerialQueue {
     
     private let serialQueue = DispatchQueue(label: "com.EZUtilites.serial.worker", qos: .background)
     
-    private var operations: [Operation] = []
+    private var operations: [Operation] = [] {
+        didSet {
+            if operations.isEmpty {
+               started = false
+            }
+        }
+    }
+    private var started = true
     
     
     // MARK: - Lifecycle
@@ -38,7 +45,14 @@ public final class SerialQueue {
         operations = []
     }
     
+    public func startIfNeeded() {
+        
+        if !started { start() }
+    }
+    
     public func start(_ progress: ((Int) -> ())? = nil,  _ completion: (() -> ())? = nil) {
+        
+        started = true
         
         progress?(operations.count)
         

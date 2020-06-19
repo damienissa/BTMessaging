@@ -83,7 +83,7 @@ extension Host: BTMessaging {
             }
         }
         
-        serial.start()
+        serial.startIfNeeded()
     }
     
     public func send(_ data: Data, for characteristic: Characteristic) {
@@ -91,7 +91,11 @@ extension Host: BTMessaging {
         guard let char = serviceControllers.compactMap(\.service.characteristics).reduce([], +).first(where: {
             $0.uuid == characteristic.char.uuid
         }) else { return }
-        peripheral.updateValue(data, for: char as! CBMutableCharacteristic, onSubscribedCentrals: centrals)
+        serial.addOperation {
+            self.peripheral.updateValue(data, for: char as! CBMutableCharacteristic, onSubscribedCentrals: self.centrals)
+        }
+        serial.startIfNeeded()
+        
     }
     
     public func receive(_ handler: @escaping DataHandler) {

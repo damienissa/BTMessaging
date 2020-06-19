@@ -22,6 +22,7 @@ public final class Host: NSObject {
     private var centrals: [CBCentral] = []
     private var handler: BTMessaging.DataHandler?
     private var charType: Characteristic.Type
+    private var dataHelper: BigDataHelper?
     
     public init(service: CBUUID = CBUUID(string: "0x101D"), peripheralName: String, type: Characteristic.Type) {
         self.peripheralName = peripheralName
@@ -135,8 +136,21 @@ extension Host: CBPeripheralManagerDelegate {
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
         peripheral.respond(to: requests.first!, withResult: .success)
-        handler?(requests.first?.value,
-                 charType.from(requests.first!.characteristic.uuid.uuidString))
+        
+        
+        if requests.first?.value?.string?.contains("Size: ") == true {
+            dataHelper = BigDataHelper(with: { (result) in
+                self.handler?(result.data(using: .utf8)!, self.charType.from(requests.first!.characteristic.uuid.uuidString))
+            })
+        }
+        
+        dataHelper?.receive(requests.first!.value!)
+        
+        if dataHelper == nil {
+            handler?(requests.first?.value,
+            charType.from(requests.first!.characteristic.uuid.uuidString))
+        }
+        
         print("\(#function), \(requests.compactMap(\.value?.string)), \(requests.first?.value?.count ?? 0), \(requests.first?.characteristic.uuid.uuidString ?? "")")
     }
     

@@ -26,6 +26,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     private var charType: Characteristic.Type
     private var didFoundDevices: (([String], Client) -> Void)?
     private var service: CBUUID
+    private var dataHelper: BigDataHelper?
     
     
     // MARK: - Lifecycle
@@ -34,7 +35,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
         self.charType = type
         self.service = service
         super.init()
-
+        
         didFoundDevices = completion
         manager = CBCentralManager(delegate: self, queue: queue)
     }
@@ -51,7 +52,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     }
     
     public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-
+        
         print(peripheral)
         if !peripherals.contains(peripheral) {
             peripherals.append(peripheral)
@@ -76,8 +77,18 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         
-        handler?(characteristic.value,
-        charType.from(characteristic.uuid.uuidString))
+        if characteristic.value?.string?.contains("Size: ") == true {
+            dataHelper = BigDataHelper(with: { (result) in
+                self.handler?(result.data(using: .utf8)!, self.charType.from(characteristic.uuid.uuidString))
+            })
+        }
+        
+        dataHelper?.receive(characteristic.value!)
+        
+        if dataHelper == nil {
+            handler?(characteristic.value,
+                     charType.from(characteristic.uuid.uuidString))
+        }
     }
     
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
@@ -114,7 +125,7 @@ extension Client: BTMessaging {
         
         serial.start()
     }
-
+    
     public func send(_ data: Data, for characteristic: Characteristic) {
         
         // MARK: - Data limit - 512 bytes -

@@ -22,6 +22,7 @@ How to create host:
         
         let host = Host(service: CBUUID(string: "0xFFDD"), peripheralName: "My Host Name", type: Char.self)
         try? host.turnOn()
+        
 ### Receive Data on Host
 
         host.receive { (data, char) in

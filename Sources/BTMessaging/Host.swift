@@ -134,7 +134,7 @@ extension Host: CBPeripheralManagerDelegate {
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
-        
+        peripheral.respond(to: requests.first!, withResult: .success)
         handler?(requests.first?.value,
                  charType.from(requests.first!.characteristic.uuid.uuidString))
         print("\(#function), \(requests.compactMap(\.value?.string)), \(requests.first?.value?.count ?? 0), \(requests.first?.characteristic.uuid.uuidString ?? "")")

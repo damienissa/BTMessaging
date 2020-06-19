@@ -22,12 +22,16 @@ public final class Host: NSObject {
     private var handler: BTMessanging.DataHandler?
     private var charType: Characteristic.Type
     
-    public init(peripheralName: String, type: Characteristic.Type) {
+    public init(service: CBUUID = CBUUID(string: "0x101D"), peripheralName: String, type: Characteristic.Type) {
         self.peripheralName = peripheralName
         self.charType = type
         
         super.init()
-        registerServiceController(MotionService())
+        registerServiceController(
+            MotionService(service: CBMutableService(type: service,
+                                                    primary: true)
+            )
+        )
     }
     
     public func turnOn() throws {

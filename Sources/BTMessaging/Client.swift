@@ -24,12 +24,14 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     private var handler: BTMessanging.DataHandler?
     private var charType: Characteristic.Type
     private var didFoundDevices: (([String], Client) -> Void)?
+    private var service: CBUUID
     
     
     // MARK: - Lifecycle
     
-    public init(type: Characteristic.Type, _ completion: (([String], Client) -> Void)? = nil) {
+    public init(for service: CBUUID = CBUUID(string: "0x101D"), type: Characteristic.Type, _ completion: (([String], Client) -> Void)? = nil) {
         self.charType = type
+        self.service = service
         super.init()
 
         didFoundDevices = completion
@@ -43,7 +45,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
         
         print(central.state)
         if central.state == .poweredOn {
-            central.scanForPeripherals(withServices: [CBUUID(string: "0x101D")], options: nil)
+            central.scanForPeripherals(withServices: [service], options: nil)
         }
     }
     
@@ -86,6 +88,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     // MARK: - Action
     
     public func connect(_ peripheral: String) {
+        
         if let ph = peripherals.first(where: {
             $0.name == peripheral
         }) {

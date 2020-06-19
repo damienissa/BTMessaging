@@ -55,7 +55,7 @@ internal class MotionService: ServiceController {
     let service: CBMutableService
     let movmentCharacteristic = MovmentCharacteristic()
     
-    internal init(service: CBMutableService = CBMutableService(type: CBUUID(string: "0x101D"), primary: true)) {
+    internal init(service: CBMutableService) {
         self.service = service
         service.characteristics = [movmentCharacteristic.characteristic]
     }

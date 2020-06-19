@@ -147,21 +147,20 @@ extension Host: CBPeripheralManagerDelegate {
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
         peripheral.respond(to: requests.first!, withResult: .success)
         
-        
-        if requests.first?.value?.string?.contains("Size: ") == true {
+        let str = requests.first?.value?.string ?? ""
+        if str.contains("Size: ") == true {
             dataHelper = BigDataHelper(with: { (result) in
                 self.handler?(result.data(using: .utf8)!, self.charType.from(requests.first!.characteristic.uuid.uuidString))
+                self.dataHelper = nil
             })
+        } else {
+            if dataHelper == nil {
+                handler?(requests.first!.characteristic.value,
+                         charType.from(requests.first!.characteristic.uuid.uuidString))
+            }
         }
         
         dataHelper?.receive(requests.first!.value!)
-        
-        if dataHelper == nil {
-            handler?(requests.first?.value,
-            charType.from(requests.first!.characteristic.uuid.uuidString))
-        }
-        
-        print("\(#function), \(requests.compactMap(\.value?.string)), \(requests.first?.value?.count ?? 0), \(requests.first?.characteristic.uuid.uuidString ?? "")")
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {

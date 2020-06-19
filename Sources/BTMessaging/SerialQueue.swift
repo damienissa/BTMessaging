@@ -18,13 +18,7 @@ public final class SerialQueue {
     
     private let serialQueue = DispatchQueue(label: "com.EZUtilites.serial.worker", qos: .background)
     
-    private var operations: [Operation] = [] {
-        didSet {
-            if operations.isEmpty {
-               started = false
-            }
-        }
-    }
+    private var operations: [Operation] = []
     private var started = false
     
     
@@ -56,7 +50,7 @@ public final class SerialQueue {
         
         progress?(operations.count)
         
-        if operations.isEmpty { return completion?() ?? () }
+        if operations.isEmpty { started = false; return completion?() ?? () }
         
         let operation = operations.first
         _ = operations.removeFirst()

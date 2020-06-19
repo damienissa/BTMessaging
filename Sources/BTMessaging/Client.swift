@@ -23,10 +23,12 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     private var didFoundDevices: (([String], Client) -> Void)?
     private var characteristics: [CBCharacteristic] = []
     private var handler: BTMessanging.DataHandler?
+    private var charType: Characteristic.Type
     
     // MARK: - Lifecycle
     
-    public init(_ completion: (([String], Client) -> Void)? = nil) {
+    public init(type: Characteristic.Type, _ completion: (([String], Client) -> Void)? = nil) {
+        self.charType = type
         super.init()
 
         didFoundDevices = completion
@@ -70,7 +72,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         
         handler?(characteristic.value,
-        Characteristic.from(characteristic.uuid.uuidString))
+        charType.from(characteristic.uuid.uuidString))
     }
     
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {

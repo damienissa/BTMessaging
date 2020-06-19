@@ -20,9 +20,12 @@ public final class Host: NSObject {
     private var serviceControllers: [ServiceController] = []
     private var centrals: [CBCentral] = []
     private var handler: BTMessanging.DataHandler?
+    private var charType: Characteristic.Type
     
-    public init(peripheralName: String) {
+    public init(peripheralName: String, type: Characteristic.Type) {
         self.peripheralName = peripheralName
+        self.charType = type
+        
         super.init()
         registerServiceController(MotionService())
     }
@@ -74,6 +77,7 @@ extension Host: BTMessanging {
 
 // MARK: - CBPeripheralManagerDelegate
 extension Host: CBPeripheralManagerDelegate {
+    
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         
         switch peripheral.state {
@@ -104,7 +108,7 @@ extension Host: CBPeripheralManagerDelegate {
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
         
         handler?(requests.first?.value,
-                 Characteristic.from(requests.first!.characteristic.uuid.uuidString))
+                 charType.from(requests.first!.characteristic.uuid.uuidString))
         print("\(#function), \(requests.compactMap(\.value?.string)), \(requests.first?.value?.count ?? 0), \(requests.first?.characteristic.uuid.uuidString ?? "")")
     }
     public func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {

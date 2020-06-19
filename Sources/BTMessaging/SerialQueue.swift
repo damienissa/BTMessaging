@@ -49,7 +49,7 @@ public final class SerialQueue {
         
         serialQueue.async { [weak self] in
             operation?()
-            self?.serialQueue.asyncAfter(deadline: .now() + 0.1) {
+            self?.serialQueue.asyncAfter(deadline: .now() + 0.3) {
                 self?.start(progress, completion)
             }
         }

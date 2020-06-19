@@ -25,7 +25,7 @@ public final class SerialQueue {
             }
         }
     }
-    private var started = true
+    private var started = false
     
     
     // MARK: - Lifecycle

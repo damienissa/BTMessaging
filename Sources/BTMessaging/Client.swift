@@ -121,7 +121,7 @@ extension Client: BTMessaging {
         
         data.forEach { dat in
             serial.addOperation { [weak self] in
-                self?.send(dat, for: characteristic)
+                self?.send(data: dat, for: characteristic)
             }
         }
         
@@ -130,13 +130,19 @@ extension Client: BTMessaging {
     
     public func send(_ data: Data, for characteristic: Characteristic) {
         
-        // MARK: - Data limit - 512 bytes -
-        if let char = characteristics.first(where: { $0.uuid == characteristic.char.uuid }) {
-            serial.addOperation { [weak self] in
-                self?.connectedPeripheral?.writeValue(data, for: char, type: .withResponse)
-            }
-            serial.startIfNeeded()
+        serial.addOperation { [weak self] in
+            self?.send(data: data, for: characteristic)
         }
+        serial.startIfNeeded()
+    }
+    
+    private func send(data: Data, for characteristic: Characteristic) {
+        
+        guard let char = characteristics.first(where: { $0.uuid == characteristic.char.uuid }) else {
+            return
+        }
+        
+        connectedPeripheral?.writeValue(data, for: char, type: .withResponse)
     }
     
     public func receive(_ handler: @escaping DataHandler) {

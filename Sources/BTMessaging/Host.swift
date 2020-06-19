@@ -78,8 +78,8 @@ extension Host: BTMessaging {
         
         data.forEach { dat in
             serial.addOperation { [weak self] in
-                
-                self?.send(dat, for: characteristic)
+            
+                self?.send(data: dat, for: characteristic)
             }
         }
         
@@ -88,14 +88,20 @@ extension Host: BTMessaging {
     
     public func send(_ data: Data, for characteristic: Characteristic) {
         
+        serial.addOperation { [weak self] in
+            self?.send(data: data, for: characteristic)
+        }
+        
+        serial.startIfNeeded()
+    }
+    
+    private func send(data: Data, for characteristic: Characteristic) {
+        
         guard let char = serviceControllers.compactMap(\.service.characteristics).reduce([], +).first(where: {
             $0.uuid == characteristic.char.uuid
-        }) else { return }
-        serial.addOperation {
-            self.peripheral.updateValue(data, for: char as! CBMutableCharacteristic, onSubscribedCentrals: self.centrals)
-        }
-        serial.startIfNeeded()
+        }) as? CBMutableCharacteristic else { return }
         
+        peripheral.updateValue(data, for: char, onSubscribedCentrals: centrals)
     }
     
     public func receive(_ handler: @escaping DataHandler) {

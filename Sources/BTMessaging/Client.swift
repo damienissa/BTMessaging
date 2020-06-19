@@ -12,6 +12,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     
     // MARK: - Properties
     
+    private let serial = SerialQueue()
     private let queue = DispatchQueue.global(qos: .utility)
     private var manager: CBCentralManager!
     private var peripherals: [CBPeripheral] = [] {
@@ -108,7 +109,9 @@ extension Client: BTMessanging {
         // MARK: - Data limit - 512 bytes -
         if let char = characteristics.first(where: { $0.uuid == characteristic.char.uuid }) {
             
-            connectedPeripheral?.writeValue(data, for: char, type: .withoutResponse)
+            serial.addOperation { [weak self] in
+                self?.connectedPeripheral?.writeValue(data, for: char, type: .withoutResponse)
+            }
         }
     }
     

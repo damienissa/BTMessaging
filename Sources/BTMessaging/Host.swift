@@ -15,6 +15,7 @@ public final class Host: NSObject {
         case peripheralAlreadyOff
     }
     
+    private let serial = SerialQueue()
     private(set) var peripheral: CBPeripheralManager!
     private let peripheralName: String
     private var serviceControllers: [ServiceController] = []
@@ -77,7 +78,11 @@ extension Host: BTMessanging {
         guard let char = serviceControllers.compactMap(\.service.characteristics).reduce([], +).first(where: {
             $0.uuid == characteristic.char.uuid
         }) else { return }
-        peripheral.updateValue(data, for: char as! CBMutableCharacteristic, onSubscribedCentrals: centrals)
+        serial.addOperation { [weak self] in
+            guard let self = self else { return }
+            self.peripheral.updateValue(data, for: char as! CBMutableCharacteristic, onSubscribedCentrals: self.centrals)
+        }
+        
     }
     
     public func receive(_ handler: @escaping DataHandler) {

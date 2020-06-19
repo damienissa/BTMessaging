@@ -8,6 +8,17 @@
 
 import CoreBluetooth
 
+public struct Device {
+    
+    public let name: String
+    public let advertisementData: [String : Any]
+    
+    init(from data: (CBPeripheral, [String : Any])) {
+        self.name = data.0.name ?? "Unknown"
+        self.advertisementData = data.1
+    }
+}
+
 public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     // MARK: - Properties
@@ -15,23 +26,23 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     private let serial = SerialQueue()
     private let queue = DispatchQueue.global(qos: .utility)
     private var manager: CBCentralManager!
-    private var peripherals: [CBPeripheral] = [] {
+    private var peripherals: [(CBPeripheral, [String : Any])] = [] {
         didSet {
-            didFoundDevices?(peripherals.compactMap(\.name), self)
+            didFoundDevices?(peripherals.map { Device(from: $0) }, self)
         }
     }
     private var connectedPeripheral: CBPeripheral?
     private var characteristics: [CBCharacteristic] = []
     private var handler: BTMessaging.DataHandler?
     private var charType: Characteristic.Type
-    private var didFoundDevices: (([String], Client) -> Void)?
+    private var didFoundDevices: (([Device], Client) -> Void)?
     private var service: CBUUID
     private var dataHelper: BigDataHelper?
     
     
     // MARK: - Lifecycle
     
-    public init(for service: CBUUID = CBUUID(string: "0x101D"), type: Characteristic.Type, _ completion: (([String], Client) -> Void)? = nil) {
+    public init(for service: CBUUID = CBUUID(string: "0x101D"), type: Characteristic.Type, _ completion: (([Device], Client) -> Void)? = nil) {
         self.charType = type
         self.service = service
         super.init()
@@ -54,8 +65,8 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         
         print(peripheral)
-        if !peripherals.contains(peripheral) {
-            peripherals.append(peripheral)
+        if peripherals.first(where: { $0.1[CBAdvertisementDataLocalNameKey] as? String == advertisementData[CBAdvertisementDataLocalNameKey] as? String }) == nil {
+            peripherals.append((peripheral, advertisementData))
         }
     }
     
@@ -104,8 +115,8 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     public func connect(_ peripheral: String) {
         
         if let ph = peripherals.first(where: {
-            $0.name == peripheral
-        }) {
+            $0.0.name == peripheral || $0.1[CBAdvertisementDataLocalNameKey] as? String == peripheral
+            })?.0 {
             manager.stopScan()
             manager.connect(ph, options: nil)
         }

@@ -9,16 +9,17 @@
 import Foundation
 import CoreBluetooth
 
-public enum Characteristic: CaseIterable {
-    
+public enum Characteristic {
+
     case data
+    case custom(String)
     
     public static func from(_ string: String?) -> Characteristic {
         switch string {
         case "0x3232":
             return .data
         default:
-            return .data
+            return string != nil ? .custom(string!) : .data
         }
     }
     
@@ -26,6 +27,8 @@ public enum Characteristic: CaseIterable {
         switch self {
         case .data:
             return CBMutableCharacteristic(type: CBUUID(string: "0x3232"), properties: [.notify, .write, .read], value: nil, permissions: [.readable, .writeable])
+        case let .custom(str):
+            return CBMutableCharacteristic(type: CBUUID(string: str), properties: [.notify, .write, .read], value: nil, permissions: [.readable, .writeable])
         }
     }
 }

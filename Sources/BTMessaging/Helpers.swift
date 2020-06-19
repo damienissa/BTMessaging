@@ -15,62 +15,60 @@ extension Data {
     }
 }
 
-protocol CharacteristicController {
+internal protocol CharacteristicController {
     var characteristic: CBMutableCharacteristic { get }
     func handleReadRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager)
     func handleWriteRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager)
     func handleSubscribeToCharacteristic(on peripheral: CBPeripheralManager)
 }
 
-protocol ServiceController {
+internal protocol ServiceController {
     var service: CBMutableService { get }
     func handleReadRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager)
     func handleWriteRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager)
     func handleSubscribeToCharacteristic(characteristic: CBMutableCharacteristic, on peripheral: CBPeripheralManager)
 }
 
-class MovmentCharacteristic: CharacteristicController {
+internal class MovmentCharacteristic: CharacteristicController {
     
-    let characteristic: CBMutableCharacteristic
-    private weak var peripheral: CBPeripheralManager?
+    internal let characteristic: CBMutableCharacteristic
+    internal weak var peripheral: CBPeripheralManager?
     
-    init(characteristic: CBMutableCharacteristic = CBMutableCharacteristic(type: CBUUID(string: "0x3232"), properties: [.notify, .write, .read], value: nil, permissions: [.readable, .writeable])) {
+    internal init(characteristic: CBMutableCharacteristic = CBMutableCharacteristic(type: CBUUID(string: "0x3232"), properties: [.notify, .write, .read], value: nil, permissions: [.readable, .writeable])) {
         self.characteristic = characteristic
     }
     
-    func handleReadRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager) {
+    internal func handleReadRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager) {
         print(request.value?.string ?? "")
     }
     
-    func handleSubscribeToCharacteristic(on peripheral: CBPeripheralManager) {
+    internal func handleSubscribeToCharacteristic(on peripheral: CBPeripheralManager) {
         self.peripheral = peripheral
     }
     
-    func handleWriteRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager) {
+    internal func handleWriteRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager) {
         print(request.value?.string ?? "")
     }
 }
 
-
-class MotionService: ServiceController {
+internal class MotionService: ServiceController {
     let service: CBMutableService
     let movmentCharacteristic = MovmentCharacteristic()
     
-    init(service: CBMutableService = CBMutableService(type: CBUUID(string: "0x101D"), primary: true)) {
+    internal init(service: CBMutableService = CBMutableService(type: CBUUID(string: "0x101D"), primary: true)) {
         self.service = service
         service.characteristics = [movmentCharacteristic.characteristic]
     }
     
-    func handleReadRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager) {
+    internal func handleReadRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager) {
         guard request.characteristic.uuid == movmentCharacteristic.characteristic.uuid else { fatalError("Invalid request") }
         movmentCharacteristic.handleReadRequest(request, peripheral: peripheral)
     }
     
-    func handleSubscribeToCharacteristic(characteristic: CBMutableCharacteristic, on peripheral: CBPeripheralManager) {
+   internal func handleSubscribeToCharacteristic(characteristic: CBMutableCharacteristic, on peripheral: CBPeripheralManager) {
         guard characteristic.uuid == movmentCharacteristic.characteristic.uuid else { fatalError("Invalid request") }
         movmentCharacteristic.handleSubscribeToCharacteristic(on: peripheral)
     }
     
-    func handleWriteRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager) {}
-    
+    internal func handleWriteRequest(_ request: CBATTRequest, peripheral: CBPeripheralManager) {}
 }

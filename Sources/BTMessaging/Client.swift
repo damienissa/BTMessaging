@@ -104,14 +104,22 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
 
 extension Client: BTMessanging {
     
+    public func send(_ data: [Data], for characteristic: Characteristic) {
+        
+        data.forEach { dat in
+            serial.addOperation { [weak self] in
+                self?.send(dat, for: characteristic)
+            }
+        }
+        
+        serial.start()
+    }
+
     public func send(_ data: Data, for characteristic: Characteristic) {
         
         // MARK: - Data limit - 512 bytes -
         if let char = characteristics.first(where: { $0.uuid == characteristic.char.uuid }) {
-            
-            serial.addOperation { [weak self] in
-                self?.connectedPeripheral?.writeValue(data, for: char, type: .withoutResponse)
-            }
+            connectedPeripheral?.writeValue(data, for: char, type: .withoutResponse)
         }
     }
     

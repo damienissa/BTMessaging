@@ -55,7 +55,7 @@ public final class Host: NSObject {
     }
     
     private func startAdvertising() {
-       
+        
         print("Starting advertising")
         
         serviceControllers
@@ -73,16 +73,24 @@ public final class Host: NSObject {
 
 extension Host: BTMessanging {
     
+    public func send(_ data: [Data], for characteristic: Characteristic) {
+        
+        data.forEach { dat in
+            serial.addOperation { [weak self] in
+                
+                self?.send(dat, for: characteristic)
+            }
+        }
+        
+        serial.start()
+    }
+    
     public func send(_ data: Data, for characteristic: Characteristic) {
         
         guard let char = serviceControllers.compactMap(\.service.characteristics).reduce([], +).first(where: {
             $0.uuid == characteristic.char.uuid
         }) else { return }
-        serial.addOperation { [weak self] in
-            guard let self = self else { return }
-            self.peripheral.updateValue(data, for: char as! CBMutableCharacteristic, onSubscribedCentrals: self.centrals)
-        }
-        
+        peripheral.updateValue(data, for: char as! CBMutableCharacteristic, onSubscribedCentrals: centrals)
     }
     
     public func receive(_ handler: @escaping DataHandler) {

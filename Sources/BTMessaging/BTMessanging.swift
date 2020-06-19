@@ -22,5 +22,6 @@ public protocol BTMessanging {
     typealias DataHandler = (_ data: Data?, _ characteristic: Characteristic) -> Void
     
     func send(_ data: Data, for characteristic: Characteristic)
+    func send(_ data: [Data], for characteristic: Characteristic)
     func receive(_ handler: @escaping DataHandler)
 }

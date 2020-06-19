@@ -31,7 +31,6 @@ public final class SerialQueue {
     public func addOperation(_ operation: @escaping Operation) {
         
         operations.append(operation)
-        start()
     }
     
     public func stop() {

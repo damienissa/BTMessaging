@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "BTMessaging",
     platforms: [
-        .iOS(SupportedPlatform.IOSVersion.v13),
+        .iOS(SupportedPlatform.IOSVersion.v10),
         .macOS(SupportedPlatform.MacOSVersion.v10_15)
     ],
     products: [

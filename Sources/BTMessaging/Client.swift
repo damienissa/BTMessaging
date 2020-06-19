@@ -12,10 +12,12 @@ public struct Device {
     
     public let name: String
     public let advertisementData: [String : Any]
+    public let rssi: Int
     
-    init(from data: (CBPeripheral, [String : Any])) {
+    init(from data: (CBPeripheral, [String : Any], Int)) {
         self.name = data.0.name ?? "Unknown"
         self.advertisementData = data.1
+        self.rssi = data.2
     }
 }
 
@@ -26,7 +28,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     private let serial = SerialQueue()
     private let queue = DispatchQueue.global(qos: .utility)
     private var manager: CBCentralManager!
-    private var peripherals: [(CBPeripheral, [String : Any])] = [] {
+    private var peripherals: [(CBPeripheral, [String : Any], Int)] = [] {
         didSet {
             didFoundDevices?(peripherals.map { Device(from: $0) }, self)
         }
@@ -66,7 +68,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
         
         print(peripheral)
         if peripherals.first(where: { $0.1[CBAdvertisementDataLocalNameKey] as? String == advertisementData[CBAdvertisementDataLocalNameKey] as? String }) == nil {
-            peripherals.append((peripheral, advertisementData))
+            peripherals.append((peripheral, advertisementData, RSSI.intValue))
         }
     }
     

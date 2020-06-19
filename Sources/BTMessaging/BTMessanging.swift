@@ -10,7 +10,9 @@ import Foundation
 import CoreBluetooth
 
 public protocol Characteristic {
+    
     var char: CBMutableCharacteristic { get }
+    
     static func from(_ string: String?) -> Self
 }
 

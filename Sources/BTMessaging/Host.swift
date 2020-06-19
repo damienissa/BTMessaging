@@ -10,13 +10,13 @@ import CoreBluetooth
 
 public final class Host: NSObject {
     
-    enum Error: Swift.Error {
+    public enum Error: Swift.Error {
         case peripheralAlreadyOn
         case peripheralAlreadyOff
     }
     
     private(set) var peripheral: CBPeripheralManager!
-    let peripheralName: String
+    private let peripheralName: String
     private var serviceControllers: [ServiceController] = []
     private var centrals: [CBCentral] = []
     private var handler: BTMessanging.DataHandler?
@@ -31,11 +31,13 @@ public final class Host: NSObject {
     }
     
     public func turnOn() throws {
+        
         if peripheral != nil { throw Error.peripheralAlreadyOn }
         peripheral = CBPeripheralManager(delegate: self, queue: .main)
     }
     
     public func turnOff() throws {
+        
         if peripheral == nil || peripheral.state != .poweredOn { throw Error.peripheralAlreadyOff }
         serviceControllers = []
         peripheral.stopAdvertising()
@@ -43,10 +45,12 @@ public final class Host: NSObject {
     }
     
     private func registerServiceController(_ serviceController: ServiceController) {
+        
         serviceControllers.append(serviceController)
     }
     
     private func startAdvertising() {
+       
         print("Starting advertising")
         
         serviceControllers
@@ -58,6 +62,9 @@ public final class Host: NSObject {
         peripheral.startAdvertising(advertisementData)
     }
 }
+
+
+// MARK: - BTMessanging
 
 extension Host: BTMessanging {
     
@@ -75,7 +82,9 @@ extension Host: BTMessanging {
     }
 }
 
+
 // MARK: - CBPeripheralManagerDelegate
+
 extension Host: CBPeripheralManagerDelegate {
     
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
@@ -98,6 +107,7 @@ extension Host: CBPeripheralManagerDelegate {
             fatalError()
         }
     }
+    
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
         print("\(#function)")
         let serviceUUID = request.characteristic.service.uuid
@@ -105,12 +115,14 @@ extension Host: CBPeripheralManagerDelegate {
             .first(where: { $0.service.uuid == serviceUUID })
             .map { $0.handleReadRequest(request, peripheral: peripheral) }
     }
+    
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
         
         handler?(requests.first?.value,
                  charType.from(requests.first!.characteristic.uuid.uuidString))
         print("\(#function), \(requests.compactMap(\.value?.string)), \(requests.first?.value?.count ?? 0), \(requests.first?.characteristic.uuid.uuidString ?? "")")
     }
+    
     public func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
         print("\(#function)")
         if !centrals.contains(central) {

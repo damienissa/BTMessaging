@@ -20,10 +20,11 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
         }
     }
     private var connectedPeripheral: CBPeripheral?
-    private var didFoundDevices: (([String], Client) -> Void)?
     private var characteristics: [CBCharacteristic] = []
     private var handler: BTMessanging.DataHandler?
     private var charType: Characteristic.Type
+    private var didFoundDevices: (([String], Client) -> Void)?
+    
     
     // MARK: - Lifecycle
     
@@ -63,6 +64,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     
     
     // MARK: - CBPeripheralDelegate
+    
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         
         peripheral.services?
@@ -93,13 +95,16 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     }
 }
 
+
+// MARK: - BTMessanging
+
 extension Client: BTMessanging {
     
     public func send(_ data: Data, for characteristic: Characteristic) {
         
         // MARK: - Data limit - 512 bytes -
         if let char = characteristics.first(where: { $0.uuid == characteristic.char.uuid }) {
-            print(char)
+            
             connectedPeripheral?.writeValue(data, for: char, type: .withoutResponse)
         }
     }

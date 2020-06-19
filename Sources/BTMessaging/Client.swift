@@ -22,7 +22,7 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     }
     private var connectedPeripheral: CBPeripheral?
     private var characteristics: [CBCharacteristic] = []
-    private var handler: BTMessanging.DataHandler?
+    private var handler: BTMessaging.DataHandler?
     private var charType: Characteristic.Type
     private var didFoundDevices: (([String], Client) -> Void)?
     private var service: CBUUID
@@ -100,9 +100,9 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
 }
 
 
-// MARK: - BTMessanging
+// MARK: - BTMessaging
 
-extension Client: BTMessanging {
+extension Client: BTMessaging {
     
     public func send(_ data: [Data], for characteristic: Characteristic) {
         

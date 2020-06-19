@@ -1,5 +1,5 @@
 //
-//  BTMessanging.swift
+//  BTMessaging.swift
 //  BTMessaging
 //
 //  Created by Dima Virych on 19.06.2020.
@@ -16,7 +16,7 @@ public protocol Characteristic {
     static func from(_ string: String?) -> Self
 }
 
-public protocol BTMessanging {
+public protocol BTMessaging {
     
     // MARK: - Max data length 512
     typealias DataHandler = (_ data: Data?, _ characteristic: Characteristic) -> Void

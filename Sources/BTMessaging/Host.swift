@@ -20,7 +20,7 @@ public final class Host: NSObject {
     private let peripheralName: String
     private var serviceControllers: [ServiceController] = []
     private var centrals: [CBCentral] = []
-    private var handler: BTMessanging.DataHandler?
+    private var handler: BTMessaging.DataHandler?
     private var charType: Characteristic.Type
     
     public init(service: CBUUID = CBUUID(string: "0x101D"), peripheralName: String, type: Characteristic.Type) {
@@ -69,9 +69,9 @@ public final class Host: NSObject {
 }
 
 
-// MARK: - BTMessanging
+// MARK: - BTMessaging
 
-extension Host: BTMessanging {
+extension Host: BTMessaging {
     
     public func send(_ data: [Data], for characteristic: Characteristic) {
         

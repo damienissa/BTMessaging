@@ -28,10 +28,11 @@ class BigDataHelper {
         }
         
         if count == 0 {
-            fatalError()
+            return
         }
-        
-        datas.append(data)
+        if data.string != nil {
+            datas.append(data)
+        }
     
         if datas.count == count {
             let arr = datas.map { [UInt8]($0) }.flatMap { $0 }

@@ -77,7 +77,8 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         
-        if characteristic.value?.string?.contains("Size: ") == true {
+        let str = characteristic.value?.string ?? ""
+        if str.contains("Size: ") == true {
             dataHelper = BigDataHelper(with: { (result) in
                 self.handler?(result.data(using: .utf8)!, self.charType.from(characteristic.uuid.uuidString))
             })

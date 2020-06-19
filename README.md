@@ -1,3 +1,4 @@
+
 # Welcome to BTMessaging
 
 ### Characteristic
@@ -56,3 +57,16 @@ How to create host:
     let cData = "Some Data for client".data(using: .utf8)!
     client.send(hData, for: Char.demo)
     host.send(cData, for: Char.demo)
+    
+### Sending big data
+First of all you must convert your data to the string! You can use `Codable` or any other way to convert data!  Next step is use chunk helper `chunkedData(with: SIZE_OF_CHUNK)`
+Example:
+
+	    let dat = Array(0..<100).compactMap(String.init).joined(separator: ", ").chunkedData(with: 128)
+	    host.send(dat, for: Char.demo)
+The same way you can send data from the client:
+
+	    let dat = Array(0..<100).compactMap(String.init).joined(separator: ", ").chunkedData(with: 128)
+        host.send(dat, for: Char.demo)
+
+### Welcome!

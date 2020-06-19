@@ -36,10 +36,10 @@ How to create host:
 How to create host: 
 
         
-        let host = Client(for: CBUUID(string: "0xFFDD"), type: Char.self, { (list, _) in 
+        let client = Client(for: CBUUID(string: "0xFFDD"), type: Char.self, { (list, _) in 
             // MARK: - List of founded HOSTs
             print(list)
-        }
+        })
         client.connect("Host name HERE")
    
 ### Receive Data on Client

@@ -123,6 +123,14 @@ public final class Client: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
             manager.connect(ph, options: nil)
         }
     }
+    
+    public func disconnect() {
+        
+        if let per = connectedPeripheral {
+            manager.cancelPeripheralConnection(per)
+            manager.scanForPeripherals(withServices: [service], options: nil)
+        }
+    }
 }
 
 

@@ -24,6 +24,9 @@ public final class Host: NSObject {
     private var charType: Characteristic.Type
     private var dataHelper: BigDataHelper?
     
+    public var receiveConnection: (() -> Void)?
+    public var receiveDisonnection: (() -> Void)?
+    
     public init(service: CBUUID = CBUUID(string: "0x101D"), peripheralName: String, type: Characteristic.Type) {
         self.peripheralName = peripheralName
         self.charType = type
@@ -168,5 +171,12 @@ extension Host: CBPeripheralManagerDelegate {
         if !centrals.contains(central) {
             centrals.append(central)
         }
+        
+        receiveConnection?()
+    }
+    
+    public func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
+        
+        receiveDisonnection?()
     }
 }

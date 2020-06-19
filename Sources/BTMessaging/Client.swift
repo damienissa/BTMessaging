@@ -119,7 +119,7 @@ extension Client: BTMessanging {
         
         // MARK: - Data limit - 512 bytes -
         if let char = characteristics.first(where: { $0.uuid == characteristic.char.uuid }) {
-            connectedPeripheral?.writeValue(data, for: char, type: .withoutResponse)
+            connectedPeripheral?.writeValue(data, for: char, type: .withResponse)
         }
     }
     

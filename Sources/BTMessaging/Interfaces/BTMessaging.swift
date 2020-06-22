@@ -19,10 +19,6 @@ public protocol Characteristic {
 public protocol BTMessaging {
     
     // MARK: - Max data length 512
-    typealias DataHandler = (_ data: Data?, _ characteristic: Characteristic) -> Void
     
-    func send(_ data: Data, for characteristic: Characteristic)
-    /// First chunk must containe: *Size: N* it will be number of chunks without first with number
-    func send(_ data: [Data], for characteristic: Characteristic)
-    func receive(_ handler: @escaping DataHandler)
+    func send(_ data: String, for characteristic: Characteristic)
 }

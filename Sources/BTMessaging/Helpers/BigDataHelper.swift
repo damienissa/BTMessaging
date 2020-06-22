@@ -14,13 +14,11 @@ class BigDataHelper {
     private var datas: [Data] = []
     private let completion: (String) -> Void
   
-    public
-    init(with completion: @escaping (String) -> Void) {
+    public init(with completion: @escaping (String) -> Void) {
         self.completion = completion
     }
     
-    public
-    func receive(_ data: Data) {
+    public func receive(_ data: Data) {
         
         if let str = data.string, str.contains("Size: "), let c = Int(str.replacingOccurrences(of: "Size: ", with: "")) {
             count = c
@@ -52,8 +50,7 @@ extension Array {
     }
 }
 
-public 
-extension String {
+public extension String {
     
     func chunkedData(with size: Int) -> [Data] {
         

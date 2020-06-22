@@ -1,6 +1,6 @@
 //
-//  Host.swift
-//  Host
+//  BTMHost.swift
+//  BTMHost
 //
 //  Created by Dima Virych on 18.06.2020.
 //  Copyright © 2020 Virych. All rights reserved.
@@ -8,7 +8,14 @@
 
 import CoreBluetooth
 
-public final class Host: NSObject {
+public protocol BTMHostDelegate: class {
+    
+    func host(_ host: BTMHost, didReceiveConnectionFrom central: CBCentral)
+    func host(_ host: BTMHost, didReceiveDisconnectionFrom central: CBCentral)
+    func host(_ host: BTMHost, didReceiveData data: Data, for characteristic: Characteristic)
+}
+
+public final class BTMHost: NSObject {
     
     public enum Error: Swift.Error {
         case peripheralAlreadyOn
@@ -20,15 +27,13 @@ public final class Host: NSObject {
     private let peripheralName: String
     private var serviceControllers: [ServiceController] = []
     private var centrals: [CBCentral] = []
-    private var handler: BTMessaging.DataHandler?
     private var charType: Characteristic.Type
     private var dataHelper: BigDataHelper?
     
-    public var receiveConnection: (() -> Void)?
-    public var receiveDisonnection: (() -> Void)?
+    public weak var delegate: BTMHostDelegate?
     
-    public init(service: CBUUID = CBUUID(string: "0x101D"), peripheralName: String, type: Characteristic.Type) {
-        self.peripheralName = peripheralName
+    public init(service: CBUUID = CBUUID(string: "0x101D"), hostName: String, type: Characteristic.Type) {
+        self.peripheralName = hostName
         self.charType = type
         
         super.init()
@@ -75,24 +80,15 @@ public final class Host: NSObject {
 
 // MARK: - BTMessaging
 
-extension Host: BTMessaging {
+extension BTMHost: BTMessaging {
     
-    public func send(_ data: [Data], for characteristic: Characteristic) {
+    public func send(_ data: String, for characteristic: Characteristic) {
         
-        data.forEach { dat in
+        let datas = data.chunkedData(with: 128)
+        datas.forEach { dat in
             serial.addOperation { [weak self] in
-            
                 self?.send(data: dat, for: characteristic)
             }
-        }
-        
-        serial.startIfNeeded()
-    }
-    
-    public func send(_ data: Data, for characteristic: Characteristic) {
-        
-        serial.addOperation { [weak self] in
-            self?.send(data: data, for: characteristic)
         }
         
         serial.startIfNeeded()
@@ -106,17 +102,12 @@ extension Host: BTMessaging {
         
         peripheral.updateValue(data, for: char, onSubscribedCentrals: centrals)
     }
-    
-    public func receive(_ handler: @escaping DataHandler) {
-        
-        self.handler = handler
-    }
 }
 
 
 // MARK: - CBPeripheralManagerDelegate
 
-extension Host: CBPeripheralManagerDelegate {
+extension BTMHost: CBPeripheralManagerDelegate {
     
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         
@@ -152,14 +143,21 @@ extension Host: CBPeripheralManagerDelegate {
         
         let str = requests.first?.value?.string ?? ""
         if str.contains("Size: ") == true {
-            dataHelper = BigDataHelper(with: { (result) in
-                self.handler?(result.data(using: .utf8)!, self.charType.from(requests.first!.characteristic.uuid.uuidString))
+            dataHelper = BigDataHelper(with: { [weak self] (result) in
+                guard let self = self, let data = result.data(using: .utf8), let id = requests.first?.characteristic.uuid.uuidString else { return }
+                main {
+                    self.delegate?.host(self, didReceiveData: data, for: self.charType.from(id))
+                }
                 self.dataHelper = nil
             })
         } else {
             if dataHelper == nil {
-                handler?(requests.first!.value,
-                         charType.from(requests.first!.characteristic.uuid.uuidString))
+                if let data = requests.first?.value, let id = requests.first?.characteristic.uuid.uuidString {
+                    main { [weak self] in
+                        guard let self = self else { return }
+                        self.delegate?.host(self, didReceiveData: data, for: self.charType.from(id))
+                    }
+                }
             }
         }
         
@@ -172,11 +170,21 @@ extension Host: CBPeripheralManagerDelegate {
             centrals.append(central)
         }
         
-        receiveConnection?()
+        main { [weak self] in
+            
+            guard let self = self else { return }
+            
+            self.delegate?.host(self, didReceiveConnectionFrom: central)
+        }
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
         
-        receiveDisonnection?()
+        main { [weak self] in
+            
+            guard let self = self else { return }
+            
+            self.delegate?.host(self, didReceiveDisconnectionFrom: central)
+        }
     }
 }

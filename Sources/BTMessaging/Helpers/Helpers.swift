@@ -9,6 +9,10 @@
 import Foundation
 import CoreBluetooth
 
+internal func main(_ comp: @escaping () -> Void) {
+    DispatchQueue.main.async(execute: comp)
+}
+
 extension Data {
     var string: String? {
         String(data: self, encoding: .utf8)

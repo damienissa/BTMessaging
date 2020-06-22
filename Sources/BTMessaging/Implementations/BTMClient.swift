@@ -75,7 +75,7 @@ extension BTMClient: BTMessaging {
     
     public func send(_ data: String, for characteristic: Characteristic) {
         
-        let datas = data.chunkedData(with: 128)
+        let datas = data.chunkedData(with: BTMessagingSettings.chunkSize)
         datas.forEach { dat in
             serial.addOperation { [weak self] in
                 self?.send(data: dat, for: characteristic)

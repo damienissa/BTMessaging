@@ -171,7 +171,7 @@ extension BTMClient: CBCentralManagerDelegate {
     
     public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         
-        let name = advertisementData[CBAdvertisementDataLocalNameKey] as? String ?? peripheral.name ?? "Unknown"
+        guard let name = advertisementData[CBAdvertisementDataLocalNameKey] as? String else { return }
         
         if devices.first(where: { $0.0 == name }) == nil {
             

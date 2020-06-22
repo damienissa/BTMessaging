@@ -84,7 +84,8 @@ extension BTMClient: BTMessaging {
                     self?.send(data: d, for: characteristic)
                 }
             }
-            return
+            
+            return serial.startIfNeeded()
         }
         
         let datas = data.chunkedData(with: BTMessagingSettings.chunkSize)

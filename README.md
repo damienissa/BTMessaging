@@ -101,8 +101,8 @@ How to create host:
     host.send(cData, for: Char.demo)
  ```   
 ### Sending big data
-First of all you must convert your data to the string! You can use `Codable` or any other way to convert data!  Next step is use chunk helper `chunkedData(with: SIZE_OF_CHUNK)`
-Default chunk size for big data is 128 symbols but you can change it using: `BTMessagingSettings.chunkSize = 30`
+First of all you must convert your data to the string!
+Default chunk size for the big data is 128 symbols but you can change it using: `BTMessagingSettings.chunkSize = 30`
 Example:
 ```swift
 

@@ -126,18 +126,22 @@ extension BTMClient: CBPeripheralDelegate {
                 
                 guard let self = self, let data = result.data(using: .utf8) else { return }
                 main {
+                    if let char = self.charType.from(characteristic.uuid.uuidString) {
                     self.delegate?.client(self,
                                           didReceiveData: data,
-                                          for: self.charType.from(characteristic.uuid.uuidString))
+                                          for: char)
+                    }
                 }
                 self.dataHelper = nil
             })
         } else {
             if dataHelper == nil, let data = characteristic.value {
                 main {
+                    if let char = self.charType.from(characteristic.uuid.uuidString) {
                     self.delegate?.client(self,
                                           didReceiveData: data,
-                                          for: self.charType.from(characteristic.uuid.uuidString))
+                                          for: char)
+                    }
                 }
             }
         }

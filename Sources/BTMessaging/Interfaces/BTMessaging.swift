@@ -13,7 +13,7 @@ public protocol Characteristic {
     
     var char: CBMutableCharacteristic { get }
     
-    static func from(_ string: String?) -> Self
+    static func from(_ string: String?) -> Self?
     static func all() -> [CBMutableCharacteristic]
 }
 

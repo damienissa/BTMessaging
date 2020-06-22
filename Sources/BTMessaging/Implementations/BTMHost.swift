@@ -141,7 +141,9 @@ extension BTMHost: CBPeripheralManagerDelegate {
             dataHelper = BigDataHelper(with: { [weak self] (result) in
                 guard let self = self, let data = result.data(using: .utf8), let id = requests.first?.characteristic.uuid.uuidString else { return }
                 main {
-                    self.delegate?.host(self, didReceiveData: data, for: self.charType.from(id))
+                    if let char = self.charType.from(id) {
+                        self.delegate?.host(self, didReceiveData: data, for: char)
+                    }
                 }
                 self.dataHelper = nil
             })
@@ -150,7 +152,9 @@ extension BTMHost: CBPeripheralManagerDelegate {
                 if let data = requests.first?.value, let id = requests.first?.characteristic.uuid.uuidString {
                     main { [weak self] in
                         guard let self = self else { return }
-                        self.delegate?.host(self, didReceiveData: data, for: self.charType.from(id))
+                        if let char = self.charType.from(id) {
+                            self.delegate?.host(self, didReceiveData: data, for: char)
+                        }
                     }
                 }
             }

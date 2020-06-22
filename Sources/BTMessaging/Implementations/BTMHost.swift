@@ -58,6 +58,7 @@ public final class BTMHost: NSObject {
         
         print("Starting advertising")
         let service = CBMutableService(type: id, primary: true)
+        service.characteristics = charType.all()
         peripheral.add(service)
         
         let advertisementData: [String: Any] = [CBAdvertisementDataLocalNameKey: peripheralName,

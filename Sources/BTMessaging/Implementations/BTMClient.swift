@@ -44,12 +44,15 @@ public final class BTMClient: NSObject {
         self.charType = type
         self.service = service
         super.init()
-        
-        manager = CBCentralManager(delegate: self, queue: queue)
     }
     
     
     // MARK: - Action
+    
+    public func startScanning() {
+        
+        manager = CBCentralManager(delegate: self, queue: queue)
+    }
     
     public func connect(_ peripheral: String) {
         

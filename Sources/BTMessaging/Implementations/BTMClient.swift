@@ -78,9 +78,11 @@ extension BTMClient: BTMessaging {
     
     public func send(_ data: String, for characteristic: Characteristic) {
         
-        guard data.count < BTMessagingSettings.chunkSize else {
+        guard data.count > BTMessagingSettings.chunkSize else {
             if let d = data.data(using: .utf8) {
-                send(data: d, for: characteristic)
+                serial.addOperation { [weak self] in
+                    self?.send(data: d, for: characteristic)
+                }
             }
             return
         }

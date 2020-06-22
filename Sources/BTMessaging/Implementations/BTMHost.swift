@@ -22,20 +22,21 @@ public final class BTMHost: NSObject {
         case peripheralAlreadyOff
     }
     
+    private let service: CBMutableService
     private let serial = SerialQueue()
     private var peripheral: CBPeripheralManager?
     private let peripheralName: String
     private var centrals: [CBCentral] = []
     private var charType: Characteristic.Type
     private var dataHelper: BigDataHelper?
-    private var id: CBUUID
+    
     
     public weak var delegate: BTMHostDelegate?
     
     public init(service: CBUUID = CBUUID(string: "0x101D"), hostName: String, type: Characteristic.Type) {
         self.peripheralName = hostName
         self.charType = type
-        self.id = service
+        self.service = CBMutableService(type: service, primary: true)
         
         super.init()
     }
@@ -57,7 +58,6 @@ public final class BTMHost: NSObject {
     private func startAdvertising() {
         
         print("Starting advertising")
-        let service = CBMutableService(type: id, primary: true)
         service.characteristics = charType.all()
         peripheral?.add(service)
         
@@ -74,9 +74,11 @@ extension BTMHost: BTMessaging {
     
     public func send(_ data: String, for characteristic: Characteristic) {
         
-        guard data.count < BTMessagingSettings.chunkSize else {
+        guard data.count > BTMessagingSettings.chunkSize else {
             if let d = data.data(using: .utf8) {
-                send(data: d, for: characteristic)
+                serial.addOperation { [weak self] in
+                    self?.send(data: d, for: characteristic)
+                }
             }
             return
         }
@@ -93,7 +95,9 @@ extension BTMHost: BTMessaging {
     
     private func send(data: Data, for characteristic: Characteristic) {
         
-        peripheral?.updateValue(data, for: characteristic.char, onSubscribedCentrals: centrals)
+        if let char = service.characteristics?.first(where: { $0.uuid == characteristic.char.uuid }) {
+            peripheral?.updateValue(data, for: char as! CBMutableCharacteristic, onSubscribedCentrals: centrals)
+        }
     }
 }
 

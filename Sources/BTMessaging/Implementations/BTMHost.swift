@@ -25,23 +25,19 @@ public final class BTMHost: NSObject {
     private let serial = SerialQueue()
     private(set) var peripheral: CBPeripheralManager!
     private let peripheralName: String
-    private var serviceControllers: [ServiceController] = []
     private var centrals: [CBCentral] = []
     private var charType: Characteristic.Type
     private var dataHelper: BigDataHelper?
+    private var id: CBUUID
     
     public weak var delegate: BTMHostDelegate?
     
     public init(service: CBUUID = CBUUID(string: "0x101D"), hostName: String, type: Characteristic.Type) {
         self.peripheralName = hostName
         self.charType = type
+        self.id = service
         
         super.init()
-        registerServiceController(
-            MotionService(service: CBMutableService(type: service,
-                                                    primary: true)
-            )
-        )
     }
     
     public func turnOn() throws {
@@ -53,26 +49,19 @@ public final class BTMHost: NSObject {
     public func turnOff() throws {
         
         if peripheral == nil || peripheral.state != .poweredOn { throw Error.peripheralAlreadyOff }
-        serviceControllers = []
+    
         peripheral.stopAdvertising()
         peripheral = nil
-    }
-    
-    private func registerServiceController(_ serviceController: ServiceController) {
-        
-        serviceControllers.append(serviceController)
     }
     
     private func startAdvertising() {
         
         print("Starting advertising")
-        
-        serviceControllers
-            .map { $0.service }
-            .forEach { peripheral.add($0) }
+        let service = CBMutableService(type: id, primary: true)
+        peripheral.add(service)
         
         let advertisementData: [String: Any] = [CBAdvertisementDataLocalNameKey: peripheralName,
-                                                CBAdvertisementDataServiceUUIDsKey: serviceControllers.map({ $0.service.uuid })]
+                                                CBAdvertisementDataServiceUUIDsKey: [service.uuid]]
         peripheral.startAdvertising(advertisementData)
     }
 }
@@ -103,11 +92,7 @@ extension BTMHost: BTMessaging {
     
     private func send(data: Data, for characteristic: Characteristic) {
         
-        guard let char = serviceControllers.compactMap(\.service.characteristics).reduce([], +).first(where: {
-            $0.uuid == characteristic.char.uuid
-        }) as? CBMutableCharacteristic else { return }
-        
-        peripheral.updateValue(data, for: char, onSubscribedCentrals: centrals)
+        peripheral.updateValue(data, for: characteristic.char, onSubscribedCentrals: centrals)
     }
 }
 
@@ -138,11 +123,9 @@ extension BTMHost: CBPeripheralManagerDelegate {
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
+        
         print("\(#function)")
-        let serviceUUID = request.characteristic.service.uuid
-        serviceControllers
-            .first(where: { $0.service.uuid == serviceUUID })
-            .map { $0.handleReadRequest(request, peripheral: peripheral) }
+        peripheral.respond(to: request, withResult: .success)
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {

@@ -23,7 +23,7 @@ public final class BTMHost: NSObject {
     }
     
     private let serial = SerialQueue()
-    private(set) var peripheral: CBPeripheralManager!
+    private var peripheral: CBPeripheralManager?
     private let peripheralName: String
     private var centrals: [CBCentral] = []
     private var charType: Characteristic.Type
@@ -48,9 +48,9 @@ public final class BTMHost: NSObject {
     
     public func turnOff() throws {
         
-        if peripheral == nil || peripheral.state != .poweredOn { throw Error.peripheralAlreadyOff }
+        if peripheral == nil || peripheral?.state != .poweredOn { throw Error.peripheralAlreadyOff }
     
-        peripheral.stopAdvertising()
+        peripheral?.stopAdvertising()
         peripheral = nil
     }
     
@@ -59,11 +59,11 @@ public final class BTMHost: NSObject {
         print("Starting advertising")
         let service = CBMutableService(type: id, primary: true)
         service.characteristics = charType.all()
-        peripheral.add(service)
+        peripheral?.add(service)
         
         let advertisementData: [String: Any] = [CBAdvertisementDataLocalNameKey: peripheralName,
                                                 CBAdvertisementDataServiceUUIDsKey: [service.uuid]]
-        peripheral.startAdvertising(advertisementData)
+        peripheral?.startAdvertising(advertisementData)
     }
 }
 
@@ -93,7 +93,7 @@ extension BTMHost: BTMessaging {
     
     private func send(data: Data, for characteristic: Characteristic) {
         
-        peripheral.updateValue(data, for: characteristic.char, onSubscribedCentrals: centrals)
+        peripheral?.updateValue(data, for: characteristic.char, onSubscribedCentrals: centrals)
     }
 }
 

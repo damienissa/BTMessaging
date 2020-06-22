@@ -69,6 +69,7 @@ How to create host:
    
     let client = BTMClient(for: CBUUID(string: "0xFFDD"), type: Char.self)
     client.delegate = self
+    client.startScanning()
     client.connect("Host name HERE")
 ```
 

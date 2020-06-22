@@ -84,6 +84,13 @@ extension BTMHost: BTMessaging {
     
     public func send(_ data: String, for characteristic: Characteristic) {
         
+        guard data.count < BTMessagingSettings.chunkSize else {
+            if let d = data.data(using: .utf8) {
+                send(d, for: characteristic)
+            }
+            return
+        }
+        
         let datas = data.chunkedData(with: BTMessagingSettings.chunkSize)
         datas.forEach { dat in
             serial.addOperation { [weak self] in

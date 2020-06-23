@@ -46,16 +46,17 @@ public final class BTMClient: NSObject {
         super.init()
     }
     
-    
     // MARK: - Action
     
     public func startScanning() {
-        
+        devices.removeAll()
         manager = CBCentralManager(delegate: self, queue: queue)
+        manager.scanForPeripherals(withServices: [service], options: nil)
     }
     
     public func connect(_ peripheral: String) {
         
+        characteristics.removeAll()
         if let ph = peripherals.first(where: { $0.1 == peripheral })?.0 {
             manager.stopScan()
             manager.connect(ph, options: nil)

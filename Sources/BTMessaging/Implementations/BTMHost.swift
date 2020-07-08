@@ -29,6 +29,7 @@ public final class BTMHost: NSObject {
     private var centrals: [CBCentral] = []
     private var charType: Characteristic.Type
     private var dataHelper: BigDataHelper?
+    private var started = false
     
     
     public weak var delegate: BTMHostDelegate?
@@ -49,6 +50,8 @@ public final class BTMHost: NSObject {
     
     public func turnOff() throws {
         
+        started = false
+        
         if peripheral == nil || peripheral?.state != .poweredOn { throw Error.peripheralAlreadyOff }
     
         peripheral?.stopAdvertising()
@@ -58,6 +61,10 @@ public final class BTMHost: NSObject {
     private func startAdvertising() {
         
         print("Starting advertising")
+        if started {
+            return
+        }
+        started = true
         service.characteristics = charType.all()
         peripheral?.add(service)
         

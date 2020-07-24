@@ -51,8 +51,6 @@ public final class BTMHost: NSObject {
     public func turnOff() throws {
         
         started = false
-        
-        if peripheral == nil || peripheral?.state != .poweredOn { throw Error.peripheralAlreadyOff }
     
         peripheral?.stopAdvertising()
         peripheral = nil

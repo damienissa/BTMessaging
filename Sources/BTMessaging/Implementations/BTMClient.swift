@@ -50,6 +50,7 @@ public final class BTMClient: NSObject {
     
     public func startScanning() {
         devices.removeAll()
+        peripherals.removeAll()
         manager = CBCentralManager(delegate: self, queue: queue)
         manager.scanForPeripherals(withServices: [service], options: nil)
     }

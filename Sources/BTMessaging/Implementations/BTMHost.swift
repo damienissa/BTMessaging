@@ -48,6 +48,10 @@ public final class BTMHost: NSObject {
         peripheral = CBPeripheralManager(delegate: self, queue: .main)
     }
     
+    public func advertisingOff() throws {
+        peripheral?.stopAdvertising()
+    }
+    
     public func turnOff() throws {
         
         started = false

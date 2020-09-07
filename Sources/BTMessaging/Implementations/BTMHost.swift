@@ -48,6 +48,12 @@ public final class BTMHost: NSObject {
         peripheral = CBPeripheralManager(delegate: self, queue: .main)
     }
     
+    public func advertisingOn() throws {
+        let advertisementData: [String: Any] = [CBAdvertisementDataLocalNameKey: peripheralName,
+                                                CBAdvertisementDataServiceUUIDsKey: [service.uuid]]
+        peripheral?.startAdvertising(advertisementData)
+    }
+    
     public func advertisingOff() throws {
         peripheral?.stopAdvertising()
     }

@@ -28,5 +28,8 @@ let package = Package(
         .testTarget(
             name: "BTMessagingTests",
             dependencies: ["BTMessaging"]),
-    ]
+    ],
+    swiftLanguageVersions: [
+        .v4_2
+        ]
 )

@@ -30,6 +30,6 @@ let package = Package(
             dependencies: ["BTMessaging"]),
     ],
     swiftLanguageVersions: [
-        .v4_2
+    .v4
         ]
 )
